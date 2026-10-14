@@ -7,3 +7,8 @@ echo hello
 sleep 2 ; echo hello
 sleep 2 & echo hello
 exit
+echo hello > out.txt
+cat out.txt
+cat < out.txt > out2.txt
+cat out2.txt
+exit
