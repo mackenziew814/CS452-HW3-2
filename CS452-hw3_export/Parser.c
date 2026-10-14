@@ -46,7 +46,7 @@ static T_words p_words() {
     return 0;
   T_words words=new_words();
   words->word=word;
-  if (cmp("|") || cmp("&") || cmp(";"))
+  if (cmp("|") || cmp("&") || cmp(";") || cmp("<") || cmp(">"))
     return words;
   words->words=p_words();
   return words;
@@ -59,6 +59,25 @@ static T_command p_command() {
     return 0;
   T_command command=new_command();
   command->words=words;
+   if (eat("<")) {
+    T_word w = p_word();
+    if (w) { 
+      command->in=strdup(w->s); f_word(w); 
+    }
+  }
+  if (eat(">")) {
+    T_word w=p_word();
+    if (w) { 
+      command->out=strdup(w->s); f_word(w); 
+    }
+  }
+  if (!command->in && eat("<")) {  //Handles > out < in order 
+      T_word w=p_word();
+    if (w) { 
+      command->in=strdup(w->s);
+      f_word(w); 
+    }
+  }
   return command;
 }
 
@@ -140,6 +159,8 @@ static void f_command(T_command t) {
   if (!t)
     return;
   f_words(t->words);
+  if (t->in)  free(t->in); //Free in and out
+  if (t->out) free(t->out);
   free(t);
 }
 

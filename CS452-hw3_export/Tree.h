@@ -20,6 +20,8 @@ struct T_pipeline {
 
 struct T_command {
   T_words words;
+  char *in; //Used for redirection 
+  char *out; 
 };
 
 struct T_words {

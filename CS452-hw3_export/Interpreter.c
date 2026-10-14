@@ -15,8 +15,8 @@ static Command i_command(T_command t) {
   if (!t)
     return 0;
   Command command=0;
-  if (t->words)
-    command=newCommand(t->words);
+  if (!t->words)
+    return 0;
   return command;
 }
 

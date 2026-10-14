@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
+#include <fcntl.h>
 
 #include "Command.h"
 #include "error.h"
@@ -9,6 +10,8 @@
 typedef struct {
   char *file;
   char **argv;
+  char *in;
+  char *out;
 } *CommandRep;
 
 #define BIARGS CommandRep r, int *eof, Jobs jobs
@@ -93,16 +96,30 @@ static char **getargs(T_words words) {
   return argv;
 }
 
-extern Command newCommand(T_words words) {
+extern Command newCommand(T_command t) {
   CommandRep r=(CommandRep)malloc(sizeof(*r));
   if (!r)
     ERROR("malloc() failed");
-  r->argv=getargs(words);
+  r->argv=getargs(t->words);
   r->file=r->argv[0];
+  r->in  = t->in  ? strdup(t->in)  : 0; //Add in and out commands
+  r->out = t->out ? strdup(t->out) : 0;
   return r;
 }
 
 static void child(CommandRep r, int fg) {
+  if (r->in) {
+    int fd=open(r->in, O_RDONLY);
+    if (fd==-1) { ERROR("open() failed"); exit(1); }
+    dup2(fd, STDIN_FILENO);
+    close(fd);
+  }
+  if (r->out) {
+    int fd=open(r->out, O_WRONLY|O_CREAT|O_TRUNC, 0644);
+    if (fd==-1) { ERROR("open() failed"); exit(1); }
+    dup2(fd, STDOUT_FILENO);
+    close(fd);
+  }
   int eof=0;
   Jobs jobs=newJobs();
   if (builtin(r,&eof,jobs))
@@ -135,6 +152,8 @@ extern void freeCommand(Command command) {
   while (*argv)
     free(*argv++);
   free(r->argv);
+  if (r->in)  free(r->in);
+  if (r->out) free(r->out);
   free(r);
 }
 
