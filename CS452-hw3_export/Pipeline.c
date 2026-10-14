@@ -34,12 +34,14 @@ extern int sizePipeline(Pipeline pipeline) {
 
 static int execute(Pipeline pipeline, Jobs jobs, int *jobbed, int *eof) {
   PipelineRep r=(PipelineRep)pipeline;
+  int pid = 0;
   for (int i=0; i<sizePipeline(r) && !*eof; i++)
-    execCommand(deq_head_ith(r->processes,i),pipeline,jobs,jobbed,eof,1);
+    pid = execCommand(deq_head_ith(r->processes,i),pipeline,jobs,jobbed,eof,1);
   return pid;
 }
 
 extern void execPipeline(Pipeline pipeline, Jobs jobs, int *eof) {
+  PipelineRep r=(PipelineRep)pipeline;
   int jobbed=0;
   int pid = execute(pipeline,jobs,&jobbed,eof);
   if (jobbed && r->fg && pid>0)

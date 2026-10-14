@@ -106,7 +106,7 @@ static void child(CommandRep r, int fg) {
   int eof=0;
   Jobs jobs=newJobs();
   if (builtin(r,&eof,jobs))
-    return(0);
+    exit(0);
   execvp(r->argv[0],r->argv);
   ERROR("execvp() failed");
   exit(1);
