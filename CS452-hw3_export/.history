@@ -1,0 +1,9 @@
+pwd
+ls
+exit
+sleep 2; echo hello
+sleep 2 ;
+echo hello
+sleep 2 ; echo hello
+sleep 2 & echo hello
+exit
