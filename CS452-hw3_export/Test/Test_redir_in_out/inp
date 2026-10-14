@@ -1,0 +1,5 @@
+echo both > /tmp/hw3_test_a
+cat < /tmp/hw3_test_a > /tmp/hw3_test_b
+cat /tmp/hw3_test_b
+rm /tmp/hw3_test_a
+rm /tmp/hw3_test_b

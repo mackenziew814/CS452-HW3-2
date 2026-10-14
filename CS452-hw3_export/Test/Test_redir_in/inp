@@ -1,0 +1,3 @@
+echo world > /tmp/testing_redir_in
+cat < /tmp/testing_redir_in
+rm /tmp/testing_redir_in

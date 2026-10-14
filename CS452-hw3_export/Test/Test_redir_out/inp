@@ -1,0 +1,3 @@
+echo tester > /tmp/testing_redir_out 
+cat < /tmp/testing_redir_out
+rm /tmp/testing_redir_out
