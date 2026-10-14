@@ -106,17 +106,17 @@ static void child(CommandRep r, int fg) {
   int eof=0;
   Jobs jobs=newJobs();
   if (builtin(r,&eof,jobs))
-    return;
+    return(0);
   execvp(r->argv[0],r->argv);
   ERROR("execvp() failed");
-  exit(0);
+  exit(1);
 }
 
-extern void execCommand(Command command, Pipeline pipeline, Jobs jobs,
+extern int execCommand(Command command, Pipeline pipeline, Jobs jobs,
 			int *jobbed, int *eof, int fg) {
   CommandRep r=command;
   if (fg && builtin(r,eof,jobs))
-    return;
+    return 0;
   if (!*jobbed) {
     *jobbed=1;
     addJobs(jobs,pipeline);
@@ -126,6 +126,7 @@ extern void execCommand(Command command, Pipeline pipeline, Jobs jobs,
     ERROR("fork() failed");
   if (pid==0)
     child(r,fg);
+  return pid;
 }
 
 extern void freeCommand(Command command) {

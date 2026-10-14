@@ -32,15 +32,18 @@ extern int sizePipeline(Pipeline pipeline) {
   return deq_len(r->processes);
 }
 
-static void execute(Pipeline pipeline, Jobs jobs, int *jobbed, int *eof) {
+static int execute(Pipeline pipeline, Jobs jobs, int *jobbed, int *eof) {
   PipelineRep r=(PipelineRep)pipeline;
   for (int i=0; i<sizePipeline(r) && !*eof; i++)
     execCommand(deq_head_ith(r->processes,i),pipeline,jobs,jobbed,eof,1);
+  return pid;
 }
 
 extern void execPipeline(Pipeline pipeline, Jobs jobs, int *eof) {
   int jobbed=0;
-  execute(pipeline,jobs,&jobbed,eof);
+  int pid = execute(pipeline,jobs,&jobbed,eof);
+  if (jobbed && r->fg && pid>0)
+    waitpid(pid,NULL,0);           // wait for foreground child to finish
   if (!jobbed)
     freePipeline(pipeline);	// for fg builtins, and such
 }
