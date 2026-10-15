@@ -34,9 +34,24 @@ extern int sizePipeline(Pipeline pipeline) {
 
 static int execute(Pipeline pipeline, Jobs jobs, int *jobbed, int *eof) {
   PipelineRep r=(PipelineRep)pipeline;
-  int pid = 0;
-  for (int i=0; i<sizePipeline(r) && !*eof; i++)
-    pid = execCommand(deq_head_ith(r->processes,i),pipeline,jobs,jobbed,eof,1);
+  int n=sizePipeline(r);
+  // create n-1 pipes 
+  int (*fds)[2]=0;
+  if (n>1) {
+    fds=malloc((n-1)*sizeof(*fds));
+    if (!fds) ERROR("malloc() failed");
+    for (int i=0; i<n-1; i++)
+      if (pipe2(fds[i],O_CLOEXEC)==-1) ERROR("pipe2() failed"); //O_CLOEXEC so unused ends auto-close on exec
+  }
+  int pid=0;
+  for (int i=0; i<n && !*eof; i++) {
+    int pin  = (i>0)   ? fds[i-1][0] : -1;
+    int pout = (i<n-1) ? fds[i][1]   : -1;
+    pid=execCommand(deq_head_ith(r->processes,i),pipeline,jobs,jobbed,eof,r->fg,pin,pout);
+  }
+  // parent closes all pipe ends
+  for (int i=0; i<n-1; i++) { close(fds[i][0]); close(fds[i][1]); }
+  if (fds) free(fds);
   return pid;
 }
 

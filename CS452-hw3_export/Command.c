@@ -108,6 +108,8 @@ extern Command newCommand(T_command t) {
 }
 
 static void child(CommandRep r, int fg) {
+  if (pin!=-1)  { dup2(pin,STDIN_FILENO);   close(pin);  }  // pipline into file
+  if (pout!=-1) { dup2(pout,STDOUT_FILENO); close(pout); }  // pipeling out of file
   if (r->in) {
     int fd=open(r->in, O_RDONLY);
     if (fd==-1) { ERROR("open() failed"); exit(1); }
@@ -130,8 +132,10 @@ static void child(CommandRep r, int fg) {
 }
 
 extern int execCommand(Command command, Pipeline pipeline, Jobs jobs,
-			int *jobbed, int *eof, int fg) {
+			int *jobbed, int *eof, int fg, int pin, int pout) {
   CommandRep r=command;
+  if (fg && pin==-1 && pout==-1 && builtin(r,eof,jobs))  // guard for pipeline
+    return 0;
   if (fg && builtin(r,eof,jobs))
     return 0;
   if (!*jobbed) {
@@ -142,7 +146,7 @@ extern int execCommand(Command command, Pipeline pipeline, Jobs jobs,
   if (pid==-1)
     ERROR("fork() failed");
   if (pid==0)
-    child(r,fg);
+    child(r,fg, pin, pout);
   return pid;
 }
 
