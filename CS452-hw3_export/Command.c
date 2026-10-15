@@ -107,7 +107,7 @@ extern Command newCommand(T_command t) {
   return r;
 }
 
-static void child(CommandRep r, int fg) {
+static void child(CommandRep r, int fg, int pin, int pout) {
   if (pin!=-1)  { dup2(pin,STDIN_FILENO);   close(pin);  }  // pipline into file
   if (pout!=-1) { dup2(pout,STDOUT_FILENO); close(pout); }  // pipeling out of file
   if (r->in) {
@@ -135,8 +135,6 @@ extern int execCommand(Command command, Pipeline pipeline, Jobs jobs,
 			int *jobbed, int *eof, int fg, int pin, int pout) {
   CommandRep r=command;
   if (fg && pin==-1 && pout==-1 && builtin(r,eof,jobs))  // guard for pipeline
-    return 0;
-  if (fg && builtin(r,eof,jobs))
     return 0;
   if (!*jobbed) {
     *jobbed=1;
