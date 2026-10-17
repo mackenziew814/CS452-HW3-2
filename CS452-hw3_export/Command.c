@@ -3,6 +3,7 @@
 #include <unistd.h>
 #include <string.h>
 #include <fcntl.h>
+#include <readline/history.h>
 
 #include "Command.h"
 #include "error.h"
@@ -62,6 +63,14 @@ BIDEFN(cd) {
     ERROR("chdir() failed");
 }
 
+BIDEFN(history) {
+  builtin_args(r,0);
+  HIST_ENTRY **hist=history_list();
+  if (hist)
+    for (int i=0; hist[i]; i++)
+      printf("%d %s\n",i+1,hist[i]->line);
+}
+
 static int builtin(BIARGS) {
   typedef struct {
     char *s;
@@ -71,6 +80,7 @@ static int builtin(BIARGS) {
     BIENTRY(exit),
     BIENTRY(pwd),
     BIENTRY(cd),
+    BIENTRY(history),
     {0,0}
   };
   int i;

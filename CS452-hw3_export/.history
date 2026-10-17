@@ -16,3 +16,7 @@ exit
 echo hello | cat
 exit
 exit
+echo hello
+echo world 
+history
+exit
