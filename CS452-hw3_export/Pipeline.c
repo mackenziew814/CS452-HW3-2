@@ -39,19 +39,14 @@ static int execute(Pipeline pipeline, Jobs jobs, int *jobbed, int *eof) {
   if (n>1) {
     fds=malloc((n-1)*sizeof(*fds));
     if (!fds) ERROR("malloc() failed");
-    for (int i=0; i<n-1; i++) {
+    for (int i=0; i<n-1; i++)
       if (pipe(fds[i])==-1) ERROR("pipe() failed");
-      for (int i=0; i<n-1; i++) {
-        if (fds[i][0]!=STDIN_FILENO)  close(fds[i][0]);
-        if (fds[i][1]!=STDOUT_FILENO) close(fds[i][1]);
-      }
-    }
   }
   int pid=0;
   for (int i=0; i<n && !*eof; i++) {
     int pin  = (i>0)   ? fds[i-1][0] : -1;
     int pout = (i<n-1) ? fds[i][1]   : -1;
-    pid=execCommand(deq_head_ith(r->processes,i),pipeline,jobs,jobbed,eof,r->fg,pin,pout);
+    pid=execCommand(deq_head_ith(r->processes,i),pipeline,jobs,jobbed,eof,r->fg,pin,pout,fds,n-1);
   }
   for (int i=0; i<n-1; i++) { close(fds[i][0]); close(fds[i][1]); }
   if (fds) free(fds);
