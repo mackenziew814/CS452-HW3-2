@@ -20,3 +20,15 @@ echo hello
 echo world 
 history
 exit
+/etc
+exit
+/etc
+echo hello
+echo hello > out.txt
+cat hello
+cat out.txt
+history
+exit
+cat hello
+eixit
+exit
