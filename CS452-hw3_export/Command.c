@@ -50,10 +50,16 @@ BIDEFN(cd) {
   } else {
     if (owd) free(owd);
     owd=cwd;
-    cwd=strdup(r->argv[1]);
+    if (r->argv[1][0]=='/') {
+      cwd=strdup(r->argv[1]);
+    } else {
+      char *base=owd ? owd : getcwd(NULL,0);
+      asprintf(&cwd,"%s/%s",base,r->argv[1]);
+      if (!owd) free(base);
+    }
   }
   if (cwd && chdir(cwd))
-    ERROR("chdir() failed"); // warn
+    ERROR("chdir() failed");
 }
 
 static int builtin(BIARGS) {
