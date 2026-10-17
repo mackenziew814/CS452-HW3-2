@@ -5,6 +5,7 @@
 #include <termios.h>
 #include <readline/readline.h>
 #include <readline/history.h>
+#include <sys/wait.h>
 
 #include "Jobs.h"
 #include "Parser.h"
@@ -32,6 +33,7 @@ int main() {
     if (*line)
       add_history(line);
     interpret(line,&eof,jobs);
+    while (waitpid(-1,NULL,WNOHANG)>0);  // reap any finished background children
     free(line);
   }
 
